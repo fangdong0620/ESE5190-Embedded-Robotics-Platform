@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+<title id="title">MotionScribe — tabletop setup</title><desc id="desc">Conceptual robotic arm mounted on a fixed base, drawing on secured paper, with adjacent touchscreen controls, STM32 board, and independent servo supply. Not to scale.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#087f8c"/></marker></defs>
+<rect width="1200" height="800" rx="16" fill="#fff"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17324d">
+
+<text x="45" y="48" font-size="16" font-weight="bold" fill="#087f8c">MOTIONSCRIBE / PHYSICAL SETUP</text>
+<text x="45" y="84" font-size="30" font-weight="bold" fill="#17324d">Standalone tabletop drawing system</text>
+<text x="45" y="113" font-size="16" font-weight="normal" fill="#5c7084">Conceptual arrangement · not to scale · final arm geometry and component sizes to be verified</text>
+<path d="M 100 410 L 1080 410 L 1150 650 L 40 650 Z" fill="#f2f6fa" stroke="#b2c2d0" stroke-width="2"/>
+<path d="M 40 650 L 1150 650 L 1150 666 L 40 666 Z" fill="#dde6ee"/>
+<rect x="190" y="382" width="160" height="45" rx="7" fill="#dce6ed" stroke="#17324d" stroke-width="2"/>
+<circle cx="205" cy="415" r="4" fill="#fff" stroke="#5c7084" stroke-width="1"/>
+<circle cx="335" cy="415" r="4" fill="#fff" stroke="#5c7084" stroke-width="1"/>
+<rect x="230" y="342" width="80" height="48" rx="8" fill="#087f8c" stroke="#17324d" stroke-width="2"/>
+<path d="M 270 350 L 365 205" fill="none" stroke="#17324d" stroke-width="35" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 270 350 L 365 205" fill="none" stroke="#c6d8e4" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 365 205 L 600 250" fill="none" stroke="#17324d" stroke-width="31" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 365 205 L 600 250" fill="none" stroke="#c6d8e4" stroke-width="21" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 600 250 L 676 305" fill="none" stroke="#17324d" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 600 250 L 676 305" fill="none" stroke="#c6d8e4" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="270" cy="350" r="24" fill="#087f8c" stroke="#17324d" stroke-width="2"/>
+<circle cx="270" cy="350" r="8" fill="#e9f7f6" stroke="#17324d" stroke-width="2"/>
+<circle cx="365" cy="205" r="25" fill="#087f8c" stroke="#17324d" stroke-width="2"/>
+<circle cx="365" cy="205" r="8" fill="#e9f7f6" stroke="#17324d" stroke-width="2"/>
+<circle cx="600" cy="250" r="21" fill="#087f8c" stroke="#17324d" stroke-width="2"/>
+<circle cx="600" cy="250" r="8" fill="#e9f7f6" stroke="#17324d" stroke-width="2"/>
+<path d="M 530 402 L 900 402 L 927 464 L 539 464 Z" fill="#fff" stroke="#7d94a8" stroke-width="2"/>
+<path d="M 572 417 L 867 417 L 880 450 L 578 450 Z" fill="none" stroke="#71b8ba" stroke-width="1.5" stroke-dasharray="6 5"/>
+<rect x="548" y="398" width="23" height="12" rx="2" fill="#8c9dac" stroke="#17324d" stroke-width="1"/>
+<rect x="873" y="398" width="23" height="12" rx="2" fill="#8c9dac" stroke="#17324d" stroke-width="1"/>
+<rect x="558" y="454" width="23" height="12" rx="2" fill="#8c9dac" stroke="#17324d" stroke-width="1"/>
+<rect x="895" y="454" width="23" height="12" rx="2" fill="#8c9dac" stroke="#17324d" stroke-width="1"/>
+<path d="M 723 444 C 707 437 697 426 707 422 C 715 419 720 424 723 427 C 728 420 740 419 744 425 C 748 432 735 438 723 444" fill="none" stroke="#087f8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="653" y="300" width="48" height="68" rx="3" fill="#e6f5f5" stroke="#087f8c" stroke-width="3"/>
+<path d="M 664 310 L 664 354 M 690 310 L 690 354" fill="none" stroke="#087f8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="662" y="331" width="30" height="20" rx="3" fill="#b7e0df" stroke="#087f8c" stroke-width="2"/>
+<rect x="674" y="343" width="7" height="51" rx="1" fill="#d98624" stroke="#d98624" stroke-width="1"/>
+<path d="M 677.5 394 L 677.5 405" fill="none" stroke="#17324d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+<text x="64" y="194" font-size="21" font-weight="bold" fill="#17324d">Adeept robotic arm</text>
+<text x="64" y="220" font-size="16" font-weight="normal" fill="#5c7084">Joint layout: conceptual</text>
+<path d="M 253 214 L 305 214 L 323 240" fill="none" stroke="#9aabbc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<text x="62" y="306" font-size="21" font-weight="bold" fill="#17324d">Fixed base</text>
+<text x="62" y="331" font-size="16" font-weight="normal" fill="#5c7084">Secured to work surface</text>
+<path d="M 177 340 L 185 340 L 215 382" fill="none" stroke="#9aabbc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<text x="819" y="217" font-size="21" font-weight="bold" fill="#17324d">Compliant pen mount</text>
+<text x="819" y="243" font-size="16" font-weight="normal" fill="#5c7084">See Figure 3</text>
+<path d="M 810 253 L 750 253 L 698 317" fill="none" stroke="#9aabbc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<text x="855" y="333" font-size="21" font-weight="bold" fill="#17324d">Paper fixture</text>
+<text x="855" y="359" font-size="16" font-weight="normal" fill="#5c7084">Clips + validated workspace</text>
+<path d="M 915 370 L 915 392 L 900 402" fill="none" stroke="#9aabbc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="125" y="495" width="270" height="120" rx="12" fill="#17324d" stroke="#17324d" stroke-width="2"/>
+<rect x="141" y="507" width="186" height="89" rx="5" fill="#f4ffff" stroke="#087f8c" stroke-width="2"/>
+<path d="M 232 573 C 194 548 189 533 204 530 C 218 526 229 538 232 542 C 243 525 262 527 267 539 C 272 553 249 567 232 573" fill="none" stroke="#087f8c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="354" cy="525" r="9" fill="#71c5ba" stroke="#087f8c" stroke-width="1"/>
+<circle cx="377" cy="525" r="9" fill="#e6a54e" stroke="#d98624" stroke-width="1"/>
+<circle cx="364" cy="570" r="18" fill="#c7d7e4" stroke="#5c7084" stroke-width="2"/>
+<path d="M 364 570 L 371 559" fill="none" stroke="#17324d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="480" y="505" width="245" height="102" rx="5" fill="#d2ece4" stroke="#087f8c" stroke-width="2"/>
+<rect x="560" y="529" width="66" height="52" rx="3" fill="#17324d" stroke="#17324d" stroke-width="2"/>
+<text x="570" y="560" font-size="15" font-weight="bold" fill="#fff">MCU</text>
+<rect x="493" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="509" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="525" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="541" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="557" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="573" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="589" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="605" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="621" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="637" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="653" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="669" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="685" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="701" y="516" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="493" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="509" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="525" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="541" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="557" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="573" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="589" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="605" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="621" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="637" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="653" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="669" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="685" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="701" y="595" width="7" height="5" rx="0" fill="#b49b5d" stroke="#9a844b" stroke-width="0"/>
+<rect x="484" y="541" width="24" height="31" rx="2" fill="#c6d3df" stroke="#5c7084" stroke-width="2"/>
+<text x="635" y="550" font-size="12" font-weight="bold" fill="#087f8c">NUCLEO</text>
+<text x="635" y="570" font-size="12" font-weight="bold" fill="#087f8c">F411RE</text>
+<rect x="830" y="488" width="230" height="122" rx="9" fill="#e6edf3" stroke="#17324d" stroke-width="2"/>
+<rect x="846" y="504" width="126" height="45" rx="4" fill="#17324d" stroke="#17324d" stroke-width="2"/>
+<text x="857" y="534" font-size="15" font-weight="bold" fill="#8de0cf">REGULATED</text>
+<circle cx="1016" cy="528" r="17" fill="#c6d3df" stroke="#5c7084" stroke-width="2"/>
+<circle cx="874" cy="581" r="8" fill="#d98624" stroke="#d98624" stroke-width="1"/>
+<circle cx="907" cy="581" r="8" fill="#17324d" stroke="#17324d" stroke-width="1"/>
+<text x="938" y="586" font-size="14" font-weight="bold" fill="#5c7084">SERVO</text>
+<text x="127" y="700" font-size="21" font-weight="bold" fill="#17324d">Touchscreen / UI</text>
+<text x="127" y="727" font-size="16" font-weight="normal" fill="#5c7084">2 buttons + analog speed knob</text>
+<text x="480" y="700" font-size="21" font-weight="bold" fill="#17324d">STM32 controller</text>
+<text x="480" y="727" font-size="16" font-weight="normal" fill="#5c7084">FreeRTOS + hardware PWM</text>
+<text x="830" y="700" font-size="21" font-weight="bold" fill="#17324d">Independent servo supply</text>
+<text x="830" y="727" font-size="16" font-weight="normal" fill="#5c7084">Voltage / current: VERIFY</text>
+<rect x="45" y="752" width="1110" height="30" rx="6" fill="#f2f6fa" stroke="#f2f6fa" stroke-width="0"/>
+<text x="64" y="773" font-size="16" font-weight="normal" fill="#5c7084">Placement sketch only. Electrical connections and common ground are shown in Figure 1.</text>
+</g></svg>
