@@ -74,7 +74,7 @@ flowchart TB
 
 This design covers the course's required **inputs** (touchscreen, buttons, and an analog potentiometer), **outputs** (display and robotic arm), **ADC input**, and an **SPI/I2C peripheral** through the selected display/touch hardware. It also addresses at least three technical topics: **timers/PWM, interrupts, RTOS, and advanced motion planning**. We will confirm the potentiometer's acceptance as the analog input and the final display/touch interface with the teaching team.
 
-**Figure 2. Shared software pipeline.** Both drawing modes use the same path representation and control flow.
+**Shared software pipeline (supporting diagram).** Both drawing modes use the same path representation and control flow.
 
 ```mermaid
 flowchart LR
@@ -93,56 +93,13 @@ We plan three FreeRTOS tasks: **Input/UI**, **Drawing/Planner**, and **Motion**.
 
 ## 4. Design Sketches
 
-**Figure 3. Proposed tabletop arrangement (conceptual, not to scale).** The arm base and paper will be firmly mounted, with the touchscreen and physical controls accessible to the user. The logic and servo supplies are separate.
+**Figure 2. Conceptual tabletop setup (not to scale).** The robotic arm, paper fixture, touchscreen, physical controls, STM32 board, and separate power supplies are arranged for standalone drawing. The arm base and paper will be securely mounted. Exact positions and electrical ratings will be confirmed during prototyping.
 
-```mermaid
-flowchart TB
-    subgraph TABLE["Tabletop setup — top view (conceptual)"]
-        direction LR
-        subgraph CONTROLS["User interface"]
-            direction TB
-            SCREEN["Touch LCD<br/>Sketch / preview / status"]
-            BUTTONS["Two buttons + speed knob"]
-        end
-        subgraph DRAWING["Fixed drawing station"]
-            direction TB
-            BASE["Secured robot base"]
-            TIP["Arm + compliant pen holder"]
-            PAPER["Paper in fixed holder"]
-            BASE --- TIP
-            TIP -->|"Pen contact / motion"| PAPER
-        end
-        subgraph ELECTRONICS["Electronics alongside station"]
-            direction TB
-            STM["STM32 controller"]
-            PWR["Separate MCU and servo supplies"]
-        end
-    end
-    SCREEN -.-> STM
-    BUTTONS -.-> STM
-    STM -.-> TIP
-    PWR -.-> STM
-    PWR -.-> TIP
-```
+![MotionScribe tabletop setup showing the arm, paper fixture, touchscreen, STM32 board, physical controls, and separate power supplies](assets/figures/figure-2-tabletop-setup.png)
 
-**Figure 4. Passive compliant pen holder (conceptual cross-section, not to scale).** An elastic element gives the pen carriage limited vertical travel, compensating for small height differences between the arm and paper. This is a **mechanical concept**, not a finalized fabricated design.
+**Figure 3. Passive compliant pen mount (conceptual cross-section, not to scale).** A guided pen carriage and elastic element are intended to absorb small height variations and reduce excessive contact force. The guide may require 3D printing; its travel, preload, friction, and lateral play will be tested.
 
-```text
-                 Robotic-arm end effector
-                           │
-                ┌──────────┴──────────┐
-                │  Fixed guide/frame  │
-                │                     │
-                │  Elastic element    │
-                │        ↕            │
-                │  Sliding carriage   │  ← passive vertical travel
-                └─────────┬───────────┘
-                          │
-                       Pen tip
-                          ▼
-              ───────────────────────   Paper
-               Secured paper fixture
-```
+![Passive compliant pen mount with fixed guide frame, elastic element, sliding pen carriage, and arm Z-motion for pen lift](assets/figures/figure-3-compliant-pen-mount.png)
 
 Our **initial pen-up/down approach** combines the passive mount with **arm Z-motion**. A separate lift actuator is a fallback only if early tests reveal inadequate clearance, contact consistency, or repeatability; it is **not included in the current budget**. We will test mount travel, friction, preload, return behavior, and lateral play. The active joint configuration and pen-tip orientation will be confirmed on the V5.0 hardware.
 
