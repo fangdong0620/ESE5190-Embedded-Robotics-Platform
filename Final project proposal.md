@@ -1,6 +1,6 @@
 # MotionScribe — Final Project Proposal
 
-*From Touchscreen to Paper: A Standalone Robotic Drawing System*
+### *From Touchscreen to Paper: A Standalone Robotic Drawing System*
 
 ESE 5190 — Smart Devices · University of Pennsylvania
 Fangdong Yuan · Haoyu Shi · Ray Lin · October 25, 2026
