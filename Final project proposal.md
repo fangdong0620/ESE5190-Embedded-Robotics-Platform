@@ -1,3 +1,5 @@
+![1792981700970](image/Finalprojectproposal/1792981700970.png)
+
 # MotionScribe — Final Project Proposal
 
 *From Touchscreen to Paper: A Standalone Robotic Drawing System*
@@ -47,50 +49,7 @@ The main challenges are embedded control (timers, interrupts, ADC, SPI/I2C, and 
 
 *Figure 1. Proposed hardware architecture.* The STM32 is the sole controller of the servos during normal operation. A PC may be connected for programming or diagnostics but is not part of the runtime system. Exact pin assignments, touch/display interfaces, servo channels, and supply ratings are subject to component verification.
 
-*Figure 1a. Signal and motion flow.*
-
-```mermaid
-%%{init: {"flowchart": {"curve": "stepAfter", "nodeSpacing": 30, "rankSpacing": 45}}}%%
-flowchart LR
-    TOUCH["Touchscreen + display<br/>Sketch / preview / status"]
-    BTN["Two buttons<br/>Start/Pause · Cancel"]
-    POT["Speed knob<br/>Potentiometer"]
-    MCU["STM32F411RE<br/>NUCLEO-F411RE<br/>C + FreeRTOS"]
-    SERVO["Servo channels<br/>Joint actuation"]
-    ARM["Adeept V5.0 arm<br/>Compliant pen → paper"]
-
-    TOUCH <-->|"SPI / I2C"| MCU
-    BTN -->|"GPIO / EXTI"| MCU
-    POT -->|"ADC"| MCU
-    MCU -->|"Timer PWM"| SERVO
-    SERVO --> ARM
-
-    classDef io fill:#eaf2f8,stroke:#527a9b,color:#172b3a;
-    classDef control fill:#dcece8,stroke:#367568,color:#163c33,stroke-width:2px;
-    classDef motion fill:#faf0de,stroke:#aa8345,color:#493719;
-    class TOUCH,BTN,POT io;
-    class MCU control;
-    class SERVO,ARM motion;
-```
-
-*Figure 1b. Power and development connections.* The MCU and servo blocks below refer to the same hardware shown above.
-
-```mermaid
-%%{init: {"flowchart": {"curve": "stepAfter", "nodeSpacing": 25, "rankSpacing": 45}}}%%
-flowchart LR
-    LOGICPWR["Standalone logic supply"] --> MCU["NUCLEO-F411RE"]
-    SERVOPWR["Regulated servo supply"] --> SERVO["Servo power rail"]
-    PC["Optional development PC"] -.->|"Programming / UART"| MCU
-
-    classDef power fill:#f1edf7,stroke:#86709f,color:#352847;
-    classDef control fill:#dcece8,stroke:#367568,color:#163c33;
-    classDef motion fill:#faf0de,stroke:#aa8345,color:#493719;
-    classDef optional fill:#f0f1f3,stroke:#858b94,color:#343941,stroke-dasharray:4 3;
-    class LOGICPWR,SERVOPWR power;
-    class MCU control;
-    class SERVO motion;
-    class PC optional;
-```
+![MotionScribe system block diagram showing bidirectional user I/O, three STM32F411RE FreeRTOS tasks and a motion queue, PWM-controlled robotic arm with a passive compliant pen mount, and separate MCU and servo power supplies](assets/figures/figure-1-system-block-diagram.png)
 
 **Connection notes:** Both supplies, the MCU, and the servos share a common ground. The NUCLEO does not supply servo power. The PC connection is for development only. Touch/display interfaces, MCU pin assignments, servo channel mapping, and supply sources/ratings remain subject to verification.
 
@@ -155,22 +114,22 @@ Drawing quality and workspace: We will compare lines, squares, circles, and hear
 
 The course budget is approximately $150 per team. The following costs match `MotionScribe_ESE5190_BOM`. These figures are planning estimates, not confirmed quotations; zero-cost items rely on course/lab loans, equipment, or materials stock.
 
-| Component                     |  Qty. | Purpose                                     | Estimated cost | Status / dependency                                                            |
-| ----------------------------- | ----: | ------------------------------------------- | -------------: | ------------------------------------------------------------------------------ |
-| STM32 NUCLEO-F411RE           |     1 | Main microcontroller                        |             $0 | School loan planned; the budget manager has been contacted.                   |
-| Adeept ADA031-V5.0 arm kit    |     1 | Arm and servos                              |            $70 | Confirm vendor approval, kit contents, and installed servo specifications.     |
+| Component                     |  Qty. | Purpose                                     | Estimated cost | Status / dependency                                                                                                 |
+| ----------------------------- | ----: | ------------------------------------------- | -------------: | ------------------------------------------------------------------------------------------------------------------- |
+| STM32 NUCLEO-F411RE           |     1 | Main microcontroller                        |             $0 | School loan planned; the budget manager has been contacted.                                                         |
+| Adeept ADA031-V5.0 arm kit    |     1 | Arm and servos                              |            $70 | Confirm vendor approval, kit contents, and installed servo specifications.                                          |
 | Touch LCD                     |     1 | Sketch input, preview, menus, and status    |             $0 | Course/lab loan preferred; SPI planned. Confirm controller, interface, 3.3 V compatibility, availability, and pins. |
-| Potentiometer                 |     1 | Analog speed input via ADC                  |             $0 | Lab stock planned; select resistance and wiring.                              |
-| Physical buttons              |     2 | Start/Pause and Cancel via GPIO             |             $0 | One pair/set from lab stock planned; debounce in firmware.                    |
-| Regulated servo supply        |     1 | Separate actuator power                     |             $0 | Lab equipment; confirm voltage and peak current margin.                       |
-| Wiring and connectors         | 1 set | Signal/power distribution and common ground |             $0 | Lab stock planned, including headers and power-distribution materials.        |
-| Base and paper fixture        | 1 set | Secure drawing setup                        |             $0 | Lab/fabrication materials; finalize geometry and mounting hardware.           |
-| Compliant pen-mount materials | 1 set | Guided carriage and elastic element         |             $8 | 3D-printed guide/sliding carriage plus spring or elastic element.              |
-| Fasteners                     | 1 set | Mechanical assembly                         |             $5 | Screws, nuts, washers, and spacers; sizes/quantities depend on final layout.    |
-| Lightweight pen               |     1 | Drawing tool                                |             $2 | Check fit and contact force.                                                   |
-| Components subtotal           |       |                                             |            $85 | Based on the listed course/lab sourcing assumptions.                          |
-| Shipping and tax reserve      |       |                                             |            $20 | Planning allowance; replace with actual checkout amounts.                     |
-| **Planned total**              |       |                                             |       **$105** | **$45 below the $150 planning target.**                                       |
+| Potentiometer                 |     1 | Analog speed input via ADC                  |             $0 | Lab stock planned; select resistance and wiring.                                                                    |
+| Physical buttons              |     2 | Start/Pause and Cancel via GPIO             |             $0 | One pair/set from lab stock planned; debounce in firmware.                                                          |
+| Regulated servo supply        |     1 | Separate actuator power                     |             $0 | Lab equipment; confirm voltage and peak current margin.                                                             |
+| Wiring and connectors         | 1 set | Signal/power distribution and common ground |             $0 | Lab stock planned, including headers and power-distribution materials.                                              |
+| Base and paper fixture        | 1 set | Secure drawing setup                        |             $0 | Lab/fabrication materials; finalize geometry and mounting hardware.                                                 |
+| Compliant pen-mount materials | 1 set | Guided carriage and elastic element         |             $8 | 3D-printed guide/sliding carriage plus spring or elastic element.                                                   |
+| Fasteners                     | 1 set | Mechanical assembly                         |             $5 | Screws, nuts, washers, and spacers; sizes/quantities depend on final layout.                                        |
+| Lightweight pen               |     1 | Drawing tool                                |             $2 | Check fit and contact force.                                                                                        |
+| Components subtotal           |       |                                             |            $85 | Based on the listed course/lab sourcing assumptions.                                                                |
+| Shipping and tax reserve      |       |                                             |            $20 | Planning allowance; replace with actual checkout amounts.                                                           |
+| **Planned total**       |       |                                             | **$105** | **$45 below the $150 planning target.**                                                                       |
 
 Parts will be sourced through approved purchasing channels after checking lab inventory. The arm kit is listed as Adeept ADA031-V5.0 and includes the arm and servos; the BOM provides the [Adeept product link](https://www.adeept.com/robotic-arm_p0453.html). MCU pin assignments are not yet specified. If any zero-cost item requires purchase or a separate lift actuator is required, the BOM and budget will be revised.
 
