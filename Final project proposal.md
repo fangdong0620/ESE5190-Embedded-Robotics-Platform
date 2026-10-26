@@ -1,221 +1,215 @@
-# MotionScribe: A Standalone Embedded Robotic Drawing System
+# MotionScribe — Final Project Proposal
 
-**Course:** ESE 5190 — Smart Devices, University of Pennsylvania  
-**Team:** Fangdong Yuan; Haoyu Shi; Ray Lin  
-**Document:** Final Project Proposal — Draft  
-**Date:** October 25, 2026
+*From Touchscreen to Paper: A Standalone Robotic Drawing System*
 
-> This proposal describes planned work, not measured performance. **[VERIFY]** marks unresolved design choices or measurements; **[RISK]** marks feasibility or schedule concerns; **[OPTIONAL / P2]** marks extensions outside the required demonstrations. Team role assignments are provisional.
+ESE 5190 — Smart Devices · University of Pennsylvania  
+Fangdong Yuan · Haoyu Shi · Ray Lin · October 25, 2026
+
+*This proposal describes planned work and acceptance targets, not measured results. Hardware specifications, calibration parameters, and drawing performance will be verified during prototyping.*
 
 ## 1. Abstract
 
-MotionScribe is a standalone embedded robotic drawing system built around an STM32F411RE running FreeRTOS. It will reproduce touchscreen sketches and draw predefined patterns using one shared pipeline for stroke processing, inverse kinematics (IK), motion planning, and hardware-timer PWM output. Both demonstrations will run on the same firmware without a runtime PC dependency. The goal is repeatable, recognizable drawings with clean stroke separation, rather than precision-plotter accuracy.
+MotionScribe is an interactive tabletop system that turns touchscreen sketches and predefined patterns into drawings on paper. An STM32F411RE (NUCLEO-F411RE) running FreeRTOS will process user input, convert drawing paths into joint commands, and drive a modified Adeept ADA031-V5.0 robotic arm through hardware-timer PWM. Both drawing modes will share one firmware build and motion pipeline, with no PC required during operation. Our target is recognizable, repeatable drawings with clean separation between strokes, rather than precision-plotter accuracy.
 
 ## 2. Motivation
 
-The project addresses the problem of translating intuitive, user-created drawings into executable robot motion on a resource-constrained embedded platform. A touchscreen sketch describes a shape, but a robotic arm needs calibrated coordinates, reachable joint targets, controlled timing, and reliable pen contact.
+Drawing on a touchscreen is intuitive; reproducing that drawing with a robotic arm is not. Screen coordinates must be mapped to a calibrated physical workspace, converted into reachable joint positions, and executed with appropriate timing and pen contact. Touch input, display updates, motion planning, and servo control must also work together on a resource-constrained microcontroller.
 
-This is an interesting integration challenge because touch sampling, adaptive path processing, IK, servo uncertainty, and concurrent user interaction all affect the physical result. MotionScribe will serve as an interactive tabletop drawing demonstrator and a practical platform for connecting user input to embedded sensing, computation, and actuation. Success means recognizable shapes and repeatable operation under these constraints.
+MotionScribe turns these challenges into an interactive demonstration of register-level C programming, FreeRTOS, peripheral drivers, robot kinematics, mechanical design, and hardware–software integration. Rather than relying on the arm manufacturer’s control application, our team will develop and understand the STM32-based drawing and control firmware.
+
+### 2.1 Feature priorities
+
+We group features as **Must** (required for the final system), **Should** (improvements after the baseline works), and **May** (optional extensions). Only Must features are committed to the final demonstration; Sections 5 and 6 define their measurable requirements.
+
+| Priority | Feature | Expected behavior |
+| --- | --- | --- |
+| Must | Draw What You Draw | Sketch a simple shape on the touchscreen, preview it, and have the arm reproduce it on paper. |
+| Must | Choose & Draw | Select a predefined pattern, such as a flower or smiley face, and have the arm draw it. |
+| Must | Standalone operation | Run both modes on the STM32 without a connected PC. |
+| Must | Physical controls | Use Start/Pause and Cancel buttons, plus an analog knob to select Slow/Normal/Fast drawing speeds. Park is a separate, validated motion state. |
+| Must | Stroke separation | Lift the pen during non-drawing moves so distinct strokes are not connected. |
+| Must | Bounded motion | Reject invalid paths and keep commanded joint motion within calibrated limits. |
+| Should | Drawing-quality refinement | Improve smoothness and repeatability through better calibration and path sampling. |
+| Should | Adjustable patterns | Change parameters such as flower size or petal count. |
+| May | Pen-contact sensing | Add an FSR to measure pen contact after the passive mount has been validated. |
+| May | More drawing inputs | Add text drawing or SVG import. |
+| May | AI-assisted input | Explore natural-language or AI-generated drawing paths as an additional input source. |
+| May | ROS 2 integration | Explore an interface to an external ROS 2 system without making the baseline device PC-dependent. |
+| May | Further hardware and interaction upgrades | Explore a custom PCB, external joint-position sensing, or sound/distance inputs. |
+
+May features are potential future extensions, not dependencies of the standalone STM32 drawing system or requirements for the course demo.
+
+### 2.2 Core engineering challenges
+
+The main challenges are embedded control (timers, interrupts, ADC, SPI/I2C, and FreeRTOS scheduling), robot motion (coordinate mapping, inverse kinematics, and path timing), and physical integration (servo power, calibration, pen contact, and repeatability).
 
 ## 3. System Block Diagram
 
-**Figure 1. Hardware architecture.** Solid arrows show signal or positive-power paths; undirected ground connections show the shared electrical reference. The PC connection is optional and used only during development/debugging.
+*Figure 1. Proposed hardware architecture.* The STM32 is the sole controller of the servos during normal operation. A PC may be connected for programming or diagnostics but is not part of the runtime system. Exact pin assignments, touch/display interfaces, servo channels, and supply ratings are subject to component verification.
 
 ```mermaid
 flowchart TB
-    TOUCH["Touch LCD: display + touch controller<br/>Model and SPI / I2C interface: VERIFY"]
-    BUTTONS["Two physical buttons<br/>Start/Pause and Cancel/Park"]
-    POT["Potentiometer<br/>Analog speed input"]
-    MCU["STM32F411RE / NUCLEO-F411RE<br/>FreeRTOS + register-level Embedded C<br/>GPIO / EXTI / ADC / SPI or I2C / UART / Timers"]
-    PC["Optional PC + debug interface<br/>Development / UART logs only"]
-    LOGICPOWER["MCU / logic supply<br/>Independent of servo rail"]
-    SUPPLY["Independent regulated servo supply<br/>Voltage / current margin: VERIFY"]
-    SERVO["Servo channels<br/>Assignments / specifications: VERIFY"]
-    ARM["Adeept robotic arm<br/>Compliant pen mount -> paper"]
-    GND["Common ground<br/>MCU GND + servo-supply return + servo GND"]
+    TOUCH["Touchscreen + display<br/>Sketch / preview / status<br/>SPI or I2C: confirm controller"]
+    BTN["Two buttons<br/>Start/Pause; Cancel"]
+    POT["Speed potentiometer<br/>Analog voltage"]
+    MCU["NUCLEO-F411RE / STM32F411RE<br/>Register-level C + FreeRTOS<br/>GPIO / EXTI / ADC / SPI or I2C / Timers"]
+    SERVO["Servo channels<br/>Joint mapping: to be verified"]
+    ARM["Adeept V5.0 robotic arm<br/>Compliant pen holder → paper"]
+    MCUPOWER["Standalone MCU/logic supply<br/>Source and rating: to be verified"]
+    SERVOPWR["Regulated servo supply<br/>Voltage/current: to be verified"]
+    GND["Common ground reference"]
+    PC["Optional PC<br/>Programming / UART logs only"]
 
-    TOUCH <-->|SPI or I2C: VERIFY| MCU
-    BUTTONS -->|GPIO / EXTI| MCU
-    POT -->|ADC| MCU
-    PC <-.->|UART debug / logs| MCU
-    LOGICPOWER -->|Logic power| MCU
-    MCU -->|Hardware Timer PWM signals| SERVO
-    SUPPLY -->|Servo power| SERVO
-    SERVO -->|Joint actuation| ARM
+    TOUCH <-->|"SPI / I2C"| MCU
+    BTN -->|"GPIO / EXTI"| MCU
+    POT -->|"ADC"| MCU
+    MCU -->|"Hardware-timer PWM"| SERVO
+    SERVO --> ARM
+    MCUPOWER --> MCU
+    SERVOPWR --> SERVO
     MCU --- GND
-    SUPPLY --- GND
     SERVO --- GND
+    MCUPOWER --- GND
+    SERVOPWR --- GND
+    PC -.->|"Development only"| MCU
 ```
 
-The design includes the required analog input, at least two inputs and two outputs, and at least one SPI or I2C peripheral. Inputs are touch, buttons, and the ADC potentiometer; outputs are the LCD and robotic arm. Register-level Embedded C and FreeRTOS are the selected implementation approach. The exact touch controller, bus allocation, pin mapping, and logic-level compatibility remain **[VERIFY]**.
+The design includes at least two inputs (touchscreen, buttons, and a potentiometer), two outputs (display and robotic arm), an analog input connected to the ADC, and an SPI/I2C peripheral through the selected display/touch hardware. It also covers at least three course topics: timers/PWM, interrupts, RTOS, and advanced motion planning.
+
+*Shared software pipeline.* Both drawing modes use one path representation and motion-control flow.
+
+```mermaid
+flowchart TB
+    A["Touchscreen strokes / stored patterns"]
+    B["Stroke processing<br/>Preserve pen-up boundaries"]
+    C["Paper calibration, path checks<br/>IK + pen-up/down trajectories"]
+    D["Validated timed joint targets<br/>Bounded motion queue"]
+    E["FreeRTOS Motion Task<br/>Timer registers → PWM → servos"]
+    A --> B --> C --> D --> E
+```
+
+We plan three FreeRTOS tasks: Input/UI, Drawing/Planner, and Motion. Only the Motion Task updates servo commands; hardware timers generate PWM independently of display refresh or path computation. We will evaluate an initial motion-target update interval of approximately 20 ms. The speed knob will adjust trajectory timing, not the PWM frame frequency. The arm’s supplied controller may help with initial assembly checks, but it will not drive the same servos simultaneously with the STM32.
+
+The firmware will enforce joint/workspace limits, bounded stroke and queue storage, and explicit Start/Pause/Cancel states. Cancel will invalidate unexecuted targets. Pause is not an emergency stop, and Park is a programmed posture rather than encoder-based homing. Without external position feedback, commanded joint targets must not be presented as measured joint or pen-tip positions.
 
 ## 4. Design Sketches
 
-**Figure 2. Overall tabletop setup — conceptual arrangement, not to scale.** The arm base and paper fixture are secured to the work surface. The touchscreen/UI, STM32 controller, and independent servo power supply are positioned alongside the drawing area; electrical connections are shown in Figure 1.
+*Figure 2. Conceptual tabletop setup (not to scale).* The robotic arm, paper fixture, touchscreen, physical controls, STM32 board, and separate power supplies are arranged for standalone drawing. The arm base and paper will be securely mounted. Exact positions and electrical ratings will be confirmed during prototyping.
 
-![MotionScribe tabletop setup with a fixed robotic arm, paper fixture, touchscreen controls, STM32 board, and independent servo supply](assets/figures/figure-2-tabletop-setup.png)
+![MotionScribe tabletop setup showing the arm, paper fixture, touchscreen, STM32 board, physical controls, and separate power supplies](assets/figures/figure-2-tabletop-setup.png)
 
-**Figure 3. Passive compliant pen mount — conceptual section, not to scale.** A spring illustrates one possible elastic element; rubber band or compliant-tube alternatives remain under evaluation.
+*Figure 3. Passive compliant pen mount (conceptual cross-section, not to scale).* A guided pen carriage and elastic element are intended to absorb small height variations and reduce excessive contact force. The guide may require 3D printing; its travel, preload, friction, and lateral play will be tested.
 
-![Passive compliant pen mount showing a printed guide frame, elastic element, sliding pen carriage, pen, passive vertical travel, and paper contact direction](assets/figures/figure-3-compliant-pen-mount.png)
+![Passive compliant pen mount with fixed guide frame, elastic element, sliding pen carriage, and arm Z-motion for pen lift](assets/figures/figure-3-compliant-pen-mount.png)
 
-The passive compliant mount is a baseline design intended to absorb Z-height variation and reduce excessive contact force. We will characterize travel, preload, friction, return behavior, and lateral play. A custom guide/frame may require 3D printing. Passive compliance does not actively lift the pen: **[VERIFY]** pen-up/down will use arm Z motion or a dedicated lift mechanism after evaluating clearance, load, and repeatability. No extra lift servo is assumed in the BOM. **[OPTIONAL / P2]** FSR pressure sensing will follow passive-mechanism characterization if time permits.
+Our initial pen-up/down design combines the passive mount with arm Z-motion. A separate lift actuator is a fallback if early tests show inadequate clearance, contact consistency, or repeatability; it is not included in the current budget. We will test mount travel, friction, preload, return behavior, and lateral play, and confirm active joints and pen-tip orientation on the V5.0 hardware.
 
 ## 5. Software Requirements Specification (SRS)
 
-These are proposed, testable acceptance targets, not completed results.
+These are proposed acceptance targets, not measured results. Any revisions will be based on documented prototype tests.
 
-| ID | Requirement | Verification method |
+| ID | Software requirement | Verification method |
 | --- | --- | --- |
-| SRS-01 | The system shall run both P0 demonstrations on the same firmware through a shared drawing pipeline without a runtime PC connection. | Perform touchscreen sketch reproduction and predefined-pattern drawing from onboard input to physical output with the PC disconnected. |
-| SRS-02 | During drawing, the system shall process Start/Pause/Cancel events within 100 ms. This specifies event-processing latency, not mechanical stopping time. | Timestamp input acquisition and corresponding command/state handling under UI and planning load. |
-| SRS-03 | The system shall reject every request in a defined invalid-path test set before drawing motion begins and display an error reason. | Submit out-of-workspace, unreachable, and joint-limit-violating paths; verify rejection before actuator execution. |
-| SRS-04 | Each P0 demonstration shall complete five consecutive trials without motion-queue corruption or out-of-bounds writes. Cancellation shall prevent further execution of unexecuted targets from the canceled path. | Retain trial results and buffer-bound checks; run separate cancellation tests at different stages and verify that no old queued targets execute afterward. |
+| SRS-01 | The system shall execute touchscreen-sketch drawing and stored-pattern drawing using one firmware build and one shared drawing pipeline, without a runtime PC connection. | Disconnect the PC and complete both drawing workflows from onboard input to physical output. |
+| SRS-02 | The software shall preserve separate strokes and generate pen-up travel between them. | Use single- and multi-stroke test paths; inspect generated targets and pen-state transitions. |
+| SRS-03 | During drawing, Start/Pause/Cancel events shall reach the command/state handler within 100 ms. Cancel shall invalidate unexecuted targets from the canceled job; 100 ms refers to event handling, not mechanical stopping time. | Timestamp events and state changes under display/planning load; cancel at different queue stages and verify that old targets are not executed. |
+| SRS-04 | The software shall reject all cases in a defined invalid-path test set before drawing starts and display an error reason. | Test out-of-workspace paths, unreachable points, and joint-limit violations; confirm rejection before actuator execution. |
+| SRS-05 | Both drawing modes shall complete five consecutive trials without detected motion-queue corruption, buffer overrun, or unhandled task failure. | Record repeated trials and run boundary, queue-saturation, and memory/stack checks; drawing trials alone do not prove memory safety. |
+| SRS-06 | The Slow, Normal, and Fast settings shall produce three distinct motion-timing profiles without changing the servo PWM frame period. | Compare commanded target intervals or trajectory duration for the same pattern at each setting; capture PWM timing. |
 
 ## 6. Hardware Requirements Specification (HRS)
 
-| ID | Requirement | Verification method |
+| ID | Hardware requirement | Verification method |
 | --- | --- | --- |
-| HRS-01 | Active servo channels shall produce PWM periods of 20.0 ms ± 0.2 ms and pulse widths within 10 µs of commanded values. Initial scope is three channels; the final channel count depends on the lift design. | Capture all active PWM channels using an oscilloscope or logic analyzer under UI and planning load. |
-| HRS-02 | The system shall provide touch input, two physical buttons, and an ADC-connected speed potentiometer. Each input shall perform its assigned function in 10 repeated trials; the knob shall distinguish Slow/Normal/Fast settings in 10 selection cycles. | Log touch/button events and ADC classifications; check sketch/pattern input, button actions, and all three speed settings. |
-| HRS-03 | The system shall complete five consecutive drawings without MCU resets caused by servo power disturbances. | Record reset status and supply behavior during representative simultaneous-joint motion. |
-| HRS-04 | The mechanism shall complete five consecutive pen-up transfers without unintended connecting lines on the calibrated paper setup. | Inspect the paper and record workspace, clearance, lift configuration, and settling time. |
+| HRS-01 | Each active servo channel shall meet the installed servo’s validated control-signal timing specification. The provisional 50 Hz target is a 20.0 ms ± 0.2 ms PWM period with commanded pulse widths accurate to ±10 µs. The initial plan uses three channels; the final channel count depends on joint/lift tests. | Capture all active channels with an oscilloscope or logic analyzer under simultaneous UI and planning activity. Confirm the servo timing specification before freezing the target. |
+| HRS-02 | The system shall accept touchscreen input, two physical buttons, and an ADC-connected speed potentiometer. Each function shall pass 10 repeated trials; the knob shall distinguish Slow/Normal/Fast in 10 selection cycles. | Log touch/button events and ADC values; test every input function and speed setting. |
+| HRS-03 | The system shall complete five consecutive drawings without an MCU reset caused by servo-power disturbances. | Monitor logic/servo rails during multi-joint movements and record reset status. |
+| HRS-04 | The mechanism shall complete five consecutive pen-up transfers without an unintended connecting line on the calibrated paper setup. | Inspect paper output and record workspace, lift clearance, and settling time. |
+| HRS-05 | The arm/pen assembly shall complete a fixed line-and-square test pattern five consecutive times, with all intended strokes visibly present and contained within the calibrated drawing area. | Use a fixed drawing checklist and archived photos; separately measure geometric deviations and repeatability. |
 
-The potentiometer is a confirmed baseline component satisfying the required analog input. PWM timing targets do not establish pen-tip positioning accuracy; drawing quality will be characterized separately.
+Drawing quality and workspace: We will compare lines, squares, circles, and hearts for recognizable shape, repeatability, and geometric deviation. 50 × 50 mm is the initial calibration area; 75 × 75 mm and 100 × 100 mm are candidate test regions where reachable. We will not claim millimeter-level drawing accuracy before measurement. Electrical PWM timing accuracy does not establish pen-tip positioning accuracy.
 
 ## 7. Bill of Materials (BOM)
 
-**Required ESE 5190 BOM Google Sheet:** **[TODO: insert team BOM Google Sheet link].**
+**Required course BOM Google Sheet:** `TODO — Insert the completed team sheet URL before submission.`
 
-The approximately **$150 team budget** is a planning target. Amounts below are provisional USD budget allocations, not vendor quotations or confirmed costs. Borrowed items assume no purchase charge; availability must be confirmed. Shipping and tax are reserved separately.
+The course budget is approximately $150 per team. These figures are planning estimates, not confirmed quotations; zero-cost items depend on lab availability.
 
-| Component | Quantity | Purpose | Source/status | Estimated unit cost | Estimated total cost | Verification/status |
-| --- | --- | --- | --- | --- | --- | --- |
-| STM32 NUCLEO-F411RE | 1 | Main controller | Course/lab loan preferred | $0 if borrowed | $0 | VERIFY availability; otherwise revise budget. |
-| Adeept ADA031-V5.0 | 1 kit | Arm and joint servos | Adeept; purchase unconfirmed | $70 allocation | $70 | VERIFY current quote, exact kit contents, and installed servo specifications. |
-| Touch LCD | 1 | Sketch input, preview, status | Course/lab loan preferred | $0 if borrowed | $0 | VERIFY model, display/touch controllers, interface, and availability. |
-| Potentiometer | 1 | Required analog speed input | Lab stock or electronics supplier | $2 allocation | $2 | Baseline; resistance and wiring to be selected. |
-| Physical buttons | 2 | Start/Pause and Cancel/Park | Lab stock or electronics supplier | $1 allocation | $2 | Baseline; switch and debounce implementation to be selected. |
-| Independent regulated servo supply | 1 | Actuator power | Lab stock or supplier | $20 allocation | $20 | VERIFY voltage, current margin, and transient performance. |
-| Wiring/connectors | 1 set | Signals, power distribution, common ground | Lab stock or supplier | $8 allocation | $8 | VERIFY connector types, wire ratings, and quantities. |
-| Base/paper fixture | 1 set | Secure arm and paper | Fabricated or lab materials | $8 allocation | $8 | VERIFY mounting geometry and paper access. |
-| Compliant pen-mount materials | 1 set | Printed guide/carriage and elastic element | Lab fabrication / materials stock | $8 allocation | $8 | VERIFY material use, travel, and preload. |
-| Fasteners/mounting hardware | 1 set | Arm and mount assembly | Lab stock or supplier | $5 allocation | $5 | VERIFY sizes and quantities. |
-| Lightweight pen | 1 | Drawing tool | Stationery stock or supplier | $2 allocation | $2 | VERIFY contact force and fit. |
-| **Component subtotal** | | | | | **$125** | Conditional on borrowing MCU and LCD. |
-| Shipping/tax reserve | 1 allowance | Purchase overhead | Estimate pending checkout | $20 allocation | $20 | VERIFY final charges. |
-| **Planned total** | | | | | **$145** | **$5 remaining against the $150 target.** |
+| Component | Qty. | Purpose | Estimated cost | Status / dependency |
+| --- | ---: | --- | ---: | --- |
+| STM32 NUCLEO-F411RE | 1 | Main microcontroller | $0 | Lab/course loan preferred; availability to be confirmed. |
+| Adeept ADA031-V5.0 arm kit | 1 | Arm and servos | $70 | Confirm vendor approval, kit contents, and installed servo specifications. |
+| Touch LCD | 1 | Sketch input, preview, and status | $0 | Lab loan assumed; controller, bus interface, and logic levels to be confirmed. |
+| Potentiometer | 1 | Analog speed input via ADC | $2 | Select value and wiring. |
+| Physical buttons | 2 | Start/Pause and Cancel | $2 | Debounce in firmware. |
+| Regulated servo supply | 1 | Separate actuator power | $20 | Confirm voltage and peak current margin. |
+| Wiring and connectors | 1 set | Signal/power distribution and common ground | $8 | Confirm connectors and wire ratings. |
+| Base and paper fixture | 1 set | Secure drawing setup | $8 | Lab or fabricated materials. |
+| Compliant pen-mount materials | 1 set | Guided carriage and elastic element | $8 | May require 3D printing. |
+| Fasteners | 1 set | Mechanical assembly | $5 | Check included kit hardware. |
+| Lightweight pen | 1 | Drawing tool | $2 | Check fit and contact force. |
+| Standalone MCU power supply | 1 | Operate without a PC | $0 | Borrowed USB wall adapter or suitable equivalent assumed. |
+| Components subtotal | | | $125 | Assumes MCU, display, and logic supply can be borrowed. |
+| Shipping and tax reserve | | | $20 | Final amount to be confirmed. |
+| **Planned total** | | | **$145** | $5 below the $150 planning target. |
 
-The final itemized Google Sheet will replace these allocations with actual sourcing and costs before ordering. If borrowing is unavailable or a separate lift actuator is required, the team will revise the BOM and scope. The expected servo mix is 2 × AD004 and 3 × AD002 **[VERIFY]** within the arm kit, not an additional purchase line.
+Parts will be sourced through approved purchasing channels after checking lab inventory. If the screen/MCU cannot be borrowed or a separate lift actuator is required, the BOM and budget will be revised.
+
+The STM32 and servos will use separate power rails with a common ground; the NUCLEO will not power the servos. We will verify supply ratings, 3.3 V control-signal compatibility, startup transients, and an accessible servo-power disconnect. Software Pause is not an emergency stop; removing servo power may release holding torque.
 
 ## 8. Final Demo
 
-The demonstration will use a tabletop setup with a fixed arm base, fixed paper, external regulated servo power, and a validated drawing workspace.
+The demo will take place on a secured tabletop with fixed paper, a touchscreen, physical controls, and standalone power. It does not require special facilities or a runtime PC.
 
-1. **Initialize and demonstrate safe startup.** Power the controller with servo PWM initially disabled, manually verify the safe arm posture, and follow the validated actuator-enable sequence before displaying READY. No external joint-position feedback is available, so the first command and enable sequence must be tested rather than assuming software ramping prevents a startup jump.
-2. **Demo A — Draw What You Draw.** Draw a simple heart, smiley, or line pattern on the touchscreen; preview the separate strokes; confirm; then let the arm reproduce the sketch. Real-time imitation is not required.
-3. **Demonstrate interaction.** Show Start/Pause/Cancel and speed control if stable in the integrated demo build. These functions remain planned and covered by SRS/HRS testing even if presentation time or integration issues limit the live sequence.
-4. **Demo B — Choose & Draw.** Select Flower or Happy Face and draw it through the same firmware and engine. The planned library contains approximately 3–5 simple patterns, including a fixed Flower; Rainy Day is another candidate.
-5. **Show standalone operation.** Run both drawing workflows without a PC attached. If useful, present UART logs or logic-analyzer captures separately as engineering validation.
+1. **Start safely.** Check a known safe arm posture, enable servos using a validated startup procedure, and display READY. No external position feedback or automatic homing is assumed.
+2. **Demo A — Draw What You Draw.** Draw a heart, smiley face, or simple multi-stroke sketch on the screen; preview it; then have the arm reproduce it on paper. Real-time imitation is not required.
+3. **Show physical interaction.** Use Start/Pause/Cancel and the Slow/Normal/Fast knob. Demonstrate controlled handling of canceled motion.
+4. **Demo B — Choose & Draw.** Select Flower or Happy Face and draw it using the same firmware and motion engine. The initial library is planned to contain approximately 3–5 simple patterns; a fixed Flower is the baseline, and Rainy Day is a possible addition.
+5. **Confirm standalone operation.** Repeat both drawing modes with the PC disconnected and show representative drawing/test evidence.
 
-The prototype, source firmware, wiring/pin assignments, BOM, calibration records, fabricated-mount files, operating instructions, and test records will accompany the final report and demonstration materials.
+Project deliverables will include firmware source code, wiring/pin documentation, the BOM, calibration notes, pen-mount design files, operating instructions, measurement records, photos, and demonstration media. Recorded commanded joint angles will not be described as measured arm positions.
 
 ## 9. Sprint Planning
 
-This is a relative six-week plan; exact dates depend on equipment availability and the course schedule. The internal planning target is an MVP by **November 20, 2026 [VERIFY]**. The final demonstration/submission date remains unconfirmed. Stored-pattern motion will be established before touchscreen drawing integration.
+Our critical path is power/PWM → joint calibration → reliable pen contact → stored-pattern drawing → touchscreen integration → repeated validation. Physical drawing feasibility takes priority over advanced UI features or optional pattern processing.
 
-| Phase | Work and exit criterion |
-| --- | --- |
-| Week 1 — Feasibility and interfaces | Confirm hardware access and official resources; review course requirements; define data interfaces and pin/memory budgets; establish RTOS scaffolding and logs. Begin touch-report and mechanical checks as hardware becomes available. |
-| Week 2 — Power and calibration | Validate independent power and single/multiple PWM channels; establish joint mappings, conservative limits, startup procedure, and a first pen-mount prototype. Exit with repeatable safe joint commands. |
-| Week 3 — Drawing engine | Validate single-point IK, line/square paths, and pen-up/down; run a stored pattern through the complete STM32 pipeline. This is the first physical drawing milestone. |
-| Week 4 — Touchscreen integration | Capture multiple strokes, preview drawings, integrate adaptive resampling, and demonstrate both P0 workflows. Target the MVP checkpoint subject to the confirmed schedule. |
-| Week 5 — Interaction and characterization | Integrate speed control and pause/cancel behavior; compare candidate workspaces; test power, repeatability, touch capture, and concurrent task load. |
-| Week 6 — Validation and delivery | Freeze configuration, complete repeated HRS/SRS trials, resolve regressions, and prepare the final demonstration and documentation. Add optional features only if core acceptance targets remain satisfied. |
-
-| Role | Primary ownership | Proposed assignment |
+| Milestone | Planned work | Completion criterion |
 | --- | --- | --- |
-| A — Embedded Firmware & Integration | Peripheral drivers, FreeRTOS, queues, state machine, timing, logs, and integration | - |
-| B — Robotics & Drawing Engine | Stroke processing, geometry/calibration, FK/IK, adaptive waypoints, motion limits, and pattern library | - |
-| C — Hardware & UI | Procurement/borrowing, power/wiring, fixtures and pen mount, touch/display integration, and UI | - |
+| Oct 26–Nov 1: Feasibility & interfaces | Confirm arm, touch LCD, power, lab inventory, and documentation. Define key pins, interfaces, and memory limits; begin peripheral bring-up and FreeRTOS structure. | Main hardware dependencies identified and initial drivers running. |
+| Nov 2–8: Power & mechanism | Test independent power and PWM; measure joint geometry and safe limits; evaluate passive pen contact and basic IK. Meet with the Account Manager by Nov 6. | Repeatable safe joint commands and documented pen-contact results. |
+| Nov 9–15: First physical drawing | Calibrate paper coordinates, generate line/square paths, implement pen-up/down, and validate rejected paths. | Draw a basic pattern using the STM32-controlled arm. |
+| Nov 16–20: MVP integration | Integrate touch/display, both drawing modes, and preliminary SRS/HRS tests. No Detkin parts orders after Nov 16. | MVP Demo: November 20, 2026, during lab hours. |
+| After MVP: Reliability & polish | Improve drawing fidelity, interaction, queue behavior, and repeated-trial performance; prioritize measured issues. | All Must features work together on one firmware build. |
+| Before final demo: Validation & delivery | Freeze the system, run acceptance tests, document limitations, rehearse, and finalize report/video. | Final demonstration and supporting engineering evidence are ready. |
 
-**Assignments are provisional and must be finalized by the team before submission.** All members will participate in at least one full-system integration session per week and be able to explain and operate the complete system. Touch acquisition, mechanical contact, and calibration require joint work across roles.
+### 9.1 Team responsibilities
 
-## Additional Design Details
+| Workstream | Primary ownership | Main deliverable |
+| --- | --- | --- |
+| A — Embedded Platform & UI | Register-level touch/display, button, ADC, and communication drivers; UI/preview; FreeRTOS coordination, queues, and command state machine. | Reliable user input, display feedback, and task/control interfaces. |
+| B — Robotics & Drawing Engine | Stroke processing, paper-coordinate mapping, joint geometry and calibration, FK/IK, path validation, trajectory timing, and pattern library. | Validated, timed joint targets for both drawing modes. |
+| C — Hardware & Motion Execution | Sourcing; power and wiring; fixtures and compliant pen mount; servo bring-up; register-level timer/PWM driver and Motion Task; electrical and mechanical testing. | Reliable servo actuation, physical drawing setup, and measured hardware performance. |
 
-### Control ownership and shared software pipeline
+Interfaces are separated at user commands, validated joint targets, and actuator execution. End-to-end integration and SRS/HRS validation span all three workstreams.
 
-STM32 will own the complete final control chain. The supplied controller may support initial assembly checks but will leave the final servo-control path; two controllers will never simultaneously drive the same servo signal.
+### 9.2 Major risks and response plans
 
-Official Adeept documentation, geometry, example code, and calibration information may be used as references to understand the mechanical system. Final application logic, IK, motion planning, peripheral drivers, and actuator-control firmware will be implemented and understood by the team in register-level Embedded C. FreeRTOS will provide task scheduling; external references will be attributed.
-
-**Figure 4. Shared software/data-flow pipeline.**
-
-```mermaid
-flowchart TB
-    TOUCH["Touchscreen sketch"]
-    PATTERN["Predefined pattern<br/>Stored stroke / waypoint arrays"]
-    STROKES["Shared Stroke representation"]
-    RESAMPLE["Adaptive resampling / simplification"]
-    CALIBRATE["Scaling + paper-to-robot calibration"]
-    PATH["Workspace checks<br/>Pen-up / travel / pen-down path"]
-    IK["Inverse kinematics<br/>Branch continuity + motion limits"]
-    TARGETS["Timed joint targets"]
-    QUEUE["Motion Queue"]
-    MOTION["Motion Task<br/>Sole actuator-command writer"]
-    CCR["Timer compare registers (CCR)"]
-    PWM["Hardware PWM"]
-    SERVOS["Servo channels"]
-
-    TOUCH --> STROKES
-    PATTERN --> STROKES
-    STROKES --> RESAMPLE
-    RESAMPLE --> CALIBRATE
-    CALIBRATE --> PATH
-    PATH --> IK
-    IK --> TARGETS
-    TARGETS --> QUEUE
-    QUEUE --> MOTION
-    MOTION --> CCR
-    CCR --> PWM
-    PWM --> SERVOS
-```
-
-| FreeRTOS task | Responsibility |
+| Risk | Early test / mitigation |
 | --- | --- |
-| Input/UI | Acquire touch reports, debounce buttons, read the knob, capture/select strokes, and update preview/status. |
-| Drawing/Planner | Process strokes, transform coordinates, generate pen trajectories, solve IK, validate limits, and generate timed joint targets. |
-| Motion | Consume validated targets and update timer compare registers; the sole actuator-command writer. |
+| Drawing reachability, pen angle, and contact | Measure the V5.0 linkage and servo limits; start with a 50 × 50 mm area; test passive compliance and pen-up clearance before complex patterns. |
+| Touch hardware, memory, and drivers | Confirm SPI/I2C controller chips and pin compatibility early; use partial display updates if a full framebuffer exceeds available SRAM. |
+| Power integrity and schedule | Check supply transients and signal levels; complete simple stored-pattern motion first; defer Should/May features if needed. |
 
-Queues/events will coordinate tasks; display refresh and UART logging must not block Motion. Interrupt handlers will perform short capture/notification work, not IK. Hardware timers generate PWM edges; software delays or GPIO bit-banging will not. The initial motion-update period is approximately 20 ms, separate from PWM generation. Speed control changes trajectory timing, not PWM frame frequency.
+### 9.3 Development and validation approach
 
-Commands include `START`, `PAUSE`, `CANCEL`, `PARK`, `SET_SPEED`, and `DRAW`; the nominal state flow is `INIT -> IDLE -> PREVIEW -> DRAWING <-> PAUSED -> DONE`, with errors entering `FAULT`. **[VERIFY]** Queue capacity, maximum stroke/point counts, buffer ownership, timing semantics, and task-stack budgets remain to be established. Full-path validation must fit bounded memory, using a compact buffered plan or validation followed by regeneration. Queue saturation will cause defined backpressure/job rejection; unexpected underrun will produce an observable hold/fault. Cancel invalidates pending targets and initiates controlled stopping; pause/resume and Park transitions follow validated paths.
+We will write register-level C peripheral drivers and develop the final application logic ourselves; FreeRTOS provides task scheduling. Adeept examples, geometry references, and manufacturer documentation may inform the design but will not replace our original firmware. Any proposed external library will follow the course's documentation/approval requirements. AI tools will not be used to write the final-project firmware, in accordance with the course manual.
 
-Logs record commanded angles, not measured positions. `DONE` means the command sequence and characterized settling interval have ended; `PARK` is a software posture, not automatic homing. External joint-position feedback and automatic stall detection are not provided.
+During implementation, we will record test evidence for key requirements and investigate failures in PWM timing, task/queue operation, memory bounds, joint calibration, stroke separation, power integrity, and drawing repeatability. Touch sampling limits and drawing quality will be measured rather than assumed; path resampling cannot recover touch points that were never captured.
 
-### Path processing, calibration, and workspace
+## References
 
-`Stroke[]` stores ordered 2D points and explicit pen-up/down boundaries. Fixed predefined patterns use stored `Stroke[]` or waypoint arrays. Finger/stylus lift ends a stroke; processing must preserve endpoints and avoid connecting separate strokes.
-
-Adaptive path resampling and waypoint generation will be the primary path-processing strategy. Nearly straight regions will retain fewer waypoints, while corners and curved regions will retain more. Local linear subdivision may be added only where testing shows visible distortion caused by sparse waypoint spacing. Waypoint spacing, joint increments, and speed will remain bounded; joint-space interpolation alone does not guarantee a straight paper path. **[VERIFY]** Algorithm tolerances and thresholds require testing.
-
-Touch acquisition and resampling are separate stages. **[VERIFY]** Measure actual coordinate-report rate, maximum gaps, dropped reports, and false stroke breaks during slow/normal/fast handwriting to establish acceptable writing speed. Resampling cannot recover uncaptured geometry. Compare point counts and shape fidelity before/after processing; reduced computation and queue use are intended benefits, not established results.
-
-Calibration includes joint-axis geometry, link dimensions, direction signs, zero offsets, safe angular ranges, PWM-angle mapping, pen-tip offset, and paper coordinates. **[VERIFY]** Exact q1/q2/q3 assignments, wrist/gripper use, and active channel count remain open. IK checks will cover reachability, branch continuity, joint limits, and identified collision/singularity boundaries.
-
-Approximately **50 × 50 mm is only the initial calibration workspace**. Compare 50 × 50, 75 × 75, and 100 × 100 mm regions where reachable before selecting the final workspace **[VERIFY]**. Repeat lines, squares, circles, and hearts to measure shape fidelity, repeatability, absolute deviation, and clean stroke separation. Backlash, deadband, mounting offsets, and compliance are **[RISK]** factors; no millimeter-level accuracy is promised. A larger drawing region does not guarantee unchanged absolute error.
-
-### Power, feasibility risks, and extensions
-
-The MCU and servos will use separate power supplies with common ground; the NUCLEO will not power the servos. A regulated 5 V servo rail is an initial candidate, with final voltage/current margin **[VERIFY]** against installed servos. Test startup and simultaneous-joint current transients, voltage sag, and MCU resets. Provide an accessible servo-power disconnect; software Pause is not an emergency stop, and cutting power can release holding torque.
-
-**[HIGH PRIORITY VERIFY]** Confirm availability and completeness of official Adeept geometry, joint mapping, calibration information, and source examples for the exact hardware version. Reserve time for physical measurement and independent modeling if references are incomplete. Do not assume that source is available, closed, or encrypted. Early touch-hardware and mechanical tests will guide scope adjustments; simpler patterns are the fallback if drawing quality is insufficient.
-
-Adjustable flower parameters remain P1. Beyond optional FSR sensing, SVG import, single-line text, and sound/distance input remain **[OPTIONAL / P2]**. ROS 2, generative AI, natural-language interpretation, custom PCBs, and feedback-equipped actuators are outside the core implementation.
-
-### Reference
-
-- [ESE 5190 F26 Final Project Manual](https://docs.google.com/document/d/17jUNs98_-TAvaIJuj3ORlqEL54Mr2z-0nuQrpoW8yvw/edit)
-- [Adeept robotic arm product page](https://www.adeept.com/robotic-arm_p0453.html)
-- [Adeept V5.0 resource entry point](https://www.adeept.com/learn/detail-103.html)
-- [ST NUCLEO-F411RE product information](https://www.st.com/en/evaluation-tools/nucleo-f411re.html)
+- [ESE 5190 Fall 2026 Final Project Manual](https://docs.google.com/document/d/17jUNs98_-TAvaIJuj3ORlqEL54Mr2z-0nuQrpoW8yvw/edit)
+- [Adeept ADA031-V5.0 product page](https://www.adeept.com/robotic-arm_p0453.html)
+- [Adeept V5.0 resources](https://www.adeept.com/learn/detail-103.html)
+- [ST NUCLEO-F411RE board information](https://www.st.com/en/evaluation-tools/nucleo-f411re.html)
+- [ST STM32F411RE microcontroller information](https://www.st.com/en/microcontrollers-microprocessors/stm32f411re.html)
