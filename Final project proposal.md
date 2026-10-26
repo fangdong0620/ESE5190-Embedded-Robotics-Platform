@@ -1,5 +1,3 @@
-![1792981700970](image/Finalprojectproposal/1792981700970.png)
-
 # MotionScribe — Final Project Proposal
 
 *From Touchscreen to Paper: A Standalone Robotic Drawing System*
